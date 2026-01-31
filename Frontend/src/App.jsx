@@ -1,30 +1,37 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
 import DashboardLayout from "./components/DashboardLayout.jsx";
 import Dashboard from "./components/Dashboard.jsx";
 import AnalyzeVoice from "./components/AnalyzeVoice";
 import History from "./components/History";
 import Profile from "./components/Profile";
-import Landing from "./components/LandingPage.jsx"
-import Feature from "./components/FeatureSection.jsx"
-import AnalyticSection from "./components/AnalyticSection.jsx"
-import BeforeAfterSection from "./components/BeforeAfterSection.jsx"
-import Testimonal from "./components/Testimonal.jsx"
-import Footer from "./components/Footer.jsx"
-import PricingSection from "./components/PricingSection.jsx"
+import { SignedIn, SignedOut } from "@clerk/clerk-react";
+import LandingLayout from "./components/LandingLayout.jsx";
+import Signup from "./components/Signup.jsx";
+import Login from "./components/Login.jsx";
+import NotFound from "./components/NotFound.jsx";
+import SsoCallback from "./components/SsoCallback.jsx";
 
 const App = () => {
   return (
-    <Routes>
-      <Route element={<DashboardLayout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/analyze" element={<AnalyzeVoice />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/profile" element={<Profile />} />
-      </Route>
-
-      <Route path="*" element={<Navigate to="/dashboard" />} />
-    </Routes>
+    // Unprotected Routes
+    <>
+        <Routes>
+          <Route path="/" element={<LandingLayout></LandingLayout>}></Route>
+          <Route path="/auth/signup" element={<Signup></Signup>}></Route>
+          <Route path="/auth/login" element={<Login></Login>}></Route>
+          <Route path="/sso-callback" element={<SsoCallback></SsoCallback>}></Route>
+        </Routes>
+      <SignedIn>
+        <Routes>
+          <Route element={<DashboardLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/analyze" element={<AnalyzeVoice />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
+        </Routes>
+      </SignedIn>
+    </>
   );
 };
 

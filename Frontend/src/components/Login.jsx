@@ -1,20 +1,82 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { RiMicAiLine } from "react-icons/ri";
+import { FcGoogle } from "react-icons/fc";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { useSignIn, useUser } from "@clerk/clerk-react";
+import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setGoogleLoading(true);
+      await signIn.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/sso-callback",
+      });
+    } catch (error) {
+      console.log("An error occurred", error);
+      toast.error("Login failed");
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(""); // Clear previous errors
+
+    if (!isLoaded) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const signinResult = await signIn.create({
+        identifier: email,
+        password: password,
+      });
+
+      if (signinResult.status === "complete") {
+        await setActive({ session: signinResult.createdSessionId });
+        // Navigate to dashboard or home instead of sso-callback for regular sign-in
+        navigate("/dashboard"); // or wherever you want users to go after sign-in
+      } else {
+        toast.error("Sign-in incomplete. Please check your credentials.");
+        setError("Sign-in failed. Please check your credentials.");
+      }
+
+      setLoading(false);
+    } catch (error) {
+      toast.error("Failed to sign in. Please try again.");
+      setError("Failed to sign in. Please try again.");
+      console.error("Sign-in error:", error);
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-        {/* Logo */}
-        <div className="flex items-center justify-center gap-2 mb-6">
+        {/* Clickable Logo → Home */}
+        <Link
+          to="/"
+          className="flex items-center justify-center gap-2 mb-6 cursor-pointer"
+        >
           <div className="h-10 w-10 flex items-center justify-center rounded-lg bg-blue-500 text-white">
-            🎤
+            <RiMicAiLine className="text-3xl" />
           </div>
           <h1 className="text-2xl font-semibold text-blue-600">Vocalify</h1>
-        </div>
+        </Link>
 
-        {/* Heading */}
         <h2 className="text-2xl font-bold text-center text-gray-900">
           Welcome Back
         </h2>
@@ -22,83 +84,73 @@ const Login = () => {
           Sign in to continue to Vocalify.
         </p>
 
-        {/* Form */}
-        <form className="mt-6 space-y-4">
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
+        {/* Google Login */}
+        <button
+          type="button"
+          onClick={() => {
+            handleGoogleSignIn();
+          }}
+          className="mt-6 w-full flex items-center justify-center gap-3 border rounded-lg py-2.5 text-sm font-medium hover:bg-gray-50 transition cursor-pointer"
+        >
+          {googleLoading ? (
+            <Spinner></Spinner>
+          ) : (
+            <p className="flex items-center justify-center gap-2">
+              {" "}
+              <FcGoogle className="text-2xl" />
+              continue with Google
+            </p>
+          )}
+        </button>
+
+        <div className="flex items-center gap-3 my-6">
+          <div className="flex-1 h-px bg-gray-300" />
+          <span className="text-xs text-gray-400">OR</span>
+          <div className="flex-1 h-px bg-gray-300" />
+        </div>
+
+        <form className="space-y-4" onSubmit={() => handleSignIn}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => {
+              setEmail(email.target.value);
+            }}
+            className="w-full rounded-lg border px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+          />
+
+          <div className="relative">
             <input
-              type="email"
-              placeholder="Enter your email"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              className="w-full rounded-lg border px-4 py-2 pr-10 text-sm focus:ring-2 focus:ring-blue-500"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
-          </div>
-
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-              >
-                👁
-              </button>
-            </div>
-          </div>
-
-          {/* Remember + Forgot */}
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center gap-2 text-gray-600">
-              <input type="checkbox" className="rounded" />
-              Remember me
-            </label>
-            <button type="button" className="text-blue-500 hover:underline">
-              Forgot Password?
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-3 flex items-center text-gray-500 cursor-pointer"
+            >
+              {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
             </button>
           </div>
 
-          {/* CAPTCHA (UI only) */}
-          <div className="flex items-center gap-3 border rounded-lg p-3">
-            <input type="checkbox" />
-            <span className="text-sm text-gray-600">I'm not a robot</span>
-            <div className="ml-auto h-10 w-10 bg-gray-200 rounded-md flex items-center justify-center text-xs">
-              img
-            </div>
-          </div>
-
-          {/* Login Button */}
           <button
             type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 rounded-lg transition"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2.5 rounded-lg font-medium cursor-pointer"
           >
             Login
           </button>
         </form>
 
-        {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-6">
           Don’t have an account?{" "}
-          <span className="text-blue-500 cursor-pointer hover:underline">
+          <Link to="/auth/signup" className="text-blue-500 hover:underline">
             Sign Up
-          </span>
+          </Link>
         </p>
-      </div>
-
-      {/* Bottom legal */}
-      <div className="absolute bottom-4 text-center text-xs text-gray-400 hidden sm:block">
-        <p>Privacy Policy | Terms of Service</p>
-        <p>© 2026 Vocalify. All rights reserved.</p>
       </div>
     </div>
   );

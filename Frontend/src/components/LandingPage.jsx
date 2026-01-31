@@ -1,12 +1,28 @@
-import tutorial from "../assets/tutorial.mp4"
-import playImg from "../assets/play.png"
-import main from "../assets/main.png"
+import tutorial from "../assets/tutorial.mp4";
+import playImg from "../assets/play.png";
+import main from "../assets/main.png";
 import { MdOutlineExplore } from "react-icons/md";
-import {useState} from "react"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useUser, useClerk } from "@clerk/clerk-react";
+import { toast } from "sonner";
 
 const Landing = () => {
+  const [play, setPlay] = useState(false);
+  const navigate = useNavigate();
+  const { isSignedIn } = useUser();
+  const { signOut } = useClerk();
 
-  const [play, setPlay] = useState(false)
+  const handleSignOut = () => { 
+    if (!isSignedIn) {
+      navigate("/auth/signup")
+    } else { 
+      signOut(() => {
+        toast.success("Signed out Successfully...!!")
+        navigate("/auth/signup")
+      })
+    }
+  }
 
   return (
     <div className="bg-white text-gray-900 ">
@@ -32,8 +48,13 @@ const Landing = () => {
             </a>
           </nav>
 
-          <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
-            Sign In
+          <button
+            onClick={() => {
+              handleSignOut();
+            }}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 cursor-pointer rounded-lg text-sm"
+          >
+            {isSignedIn ? "Sign Out" : "Sign up"}
           </button>
         </div>
       </header>
@@ -53,12 +74,14 @@ const Landing = () => {
             <button className="bg-blue-500 font-semibold text-sm hover:bg-blue-600 text-white px-6 py-3 rounded-lg">
               Get Started
             </button>
-            <button className="border flex items-center justify-center text-xs font-bold px-6 py-3 rounded-lg"><MdOutlineExplore></MdOutlineExplore>View Demo</button>
+            <button className="border flex items-center justify-center text-xs font-bold px-6 py-3 rounded-lg">
+              <MdOutlineExplore></MdOutlineExplore>View Demo
+            </button>
           </div>
         </div>
 
         {/* Hero Visual */}
-        <div  className="bg-gray-100 rounded-xl h-64 flex items-center justify-center">
+        <div className="bg-gray-100 rounded-xl h-64 flex items-center justify-center">
           {play ? (
             <video
               src={tutorial}
@@ -67,8 +90,15 @@ const Landing = () => {
               className="w-full h-full object-cover rounded-md"
             />
           ) : (
-            <div onClick={() => setPlay(true)} className="relative transition-all duration-100">
-              <img src={playImg} alt="" className="absolute top-1/3 left-[45%]"/>
+            <div
+              onClick={() => setPlay(true)}
+              className="relative transition-all duration-100"
+            >
+              <img
+                src={playImg}
+                alt=""
+                className="absolute top-1/3 left-[45%]"
+              />
               <img src={main} alt="" />
             </div>
           )}
