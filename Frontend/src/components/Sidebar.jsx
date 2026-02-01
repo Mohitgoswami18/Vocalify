@@ -1,15 +1,30 @@
 import { NavLink } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { useClerk } from "@clerk/clerk-react";
+import {toast} from "sonner"
+import { useNavigate } from "react-router-dom";
 
-const menu = [
-  { name: "Dashboard", path: "/dashboard" },
-  { name: "Analyze Voice", path: "/analyze" },
-  { name: "History", path: "/history" },
-  { name: "Profile", path: "/profile" },
-];
 
 const Sidebar = () => {
+  const navigate = useNavigate()
+  const { signOut, user } = useClerk();
+  
+  const menu = [
+    { name: "Dashboard", path: `/${user?.username}/dashboard` },
+    { name: "Analyze Voice", path: `/${user?.username}/analyze` },
+    { name: "History", path: `/${user?.username}/history` },
+    { name: "Profile", path: `/${user?.username}/profile` },
+  ];
+
+  const handleSignOut = () => {
+    signOut(() => {
+      toast.success("Signed out Successfully...!!");
+      navigate("/auth/signup");
+    });
+  };
+
   return (
-    <aside className="hidden md:flex w-64 shadow-sm bg-white border-r flex-col">
+    <div className="hidden md:flex w-64 shadow-sm bg-white border-r flex-col">
       <div className="p-6 font-semibold text-blue-600 flex items-center gap-2">
         🎤 Vocalify
       </div>
@@ -31,7 +46,16 @@ const Sidebar = () => {
           </NavLink>
         ))}
       </nav>
-    </aside>
+      <Button
+        className="m-4 cursor-pointer"
+        variant="destructive"
+        onClick={() => {
+          handleSignOut()
+        }}
+      >
+        Sign Out
+      </Button>
+    </div>
   );
 };
 

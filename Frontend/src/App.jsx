@@ -24,10 +24,10 @@ const App = () => {
       <SignedIn>
         <Routes>
           <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/analyze" element={<AnalyzeVoice />} />
-            <Route path="/history" element={<History />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/:username/dashboard" element={<Dashboard />} />
+            <Route path="/:username/analyze" element={<AnalyzeVoice />} />
+            <Route path="/:username/history" element={<History />} />
+            <Route path="/:username/profile" element={<Profile />} />
           </Route>
         </Routes>
       </SignedIn>

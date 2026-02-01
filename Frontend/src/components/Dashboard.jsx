@@ -1,3 +1,7 @@
+import { IoAnalyticsSharp } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+
 const metrics = [
   {
     title: "Confidence",
@@ -25,9 +29,12 @@ const metrics = [
   },
 ];
 
-
-
 const Dashboard = () => {
+
+  const navigate = useNavigate();
+  const param = useParams();
+  const username = param.username;
+
   return (
     <div className="font-[Inter]">
       {/* Welcome */}
@@ -40,9 +47,7 @@ const Dashboard = () => {
       </p>
 
       {/* Metrics */}
-      <h2 className="mt-8 mb-4 font-bold text-gray-800">
-        Your Key Metrics
-      </h2>
+      <h2 className="mt-8 mb-4 font-bold text-gray-800">Your Key Metrics</h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {metrics.map((item, index) => (
@@ -70,11 +75,21 @@ const Dashboard = () => {
       <h2 className="mt-8 mb-4 font-semibold text-gray-800">Quick Actions</h2>
 
       <div className="flex flex-col sm:flex-row gap-4">
-        <button className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
-          🎙 Start New Analysis
+        <button
+          onClick={() => {
+            navigate(`/:${username}/analyze`);
+          }}
+          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2"
+        >
+          <IoAnalyticsSharp></IoAnalyticsSharp> Start New Analysis
         </button>
 
-        <button className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+        <button
+          onClick={() => {
+            navigate(`/:${username}/history`);
+          }}
+          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2"
+        >
           ⏱ Review Past Results
         </button>
       </div>

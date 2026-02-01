@@ -6,11 +6,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser, useClerk } from "@clerk/clerk-react";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Landing = () => {
   const [play, setPlay] = useState(false);
   const navigate = useNavigate();
-  const { isSignedIn } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
   const { signOut } = useClerk();
 
   const handleSignOut = () => { 
@@ -23,6 +24,15 @@ const Landing = () => {
       })
     }
   }
+
+  const handleClick = () => {
+    if(!isLoaded) return;
+    if(isSignedIn) {
+      navigate(`/${user.username}/dashboard`)
+    } else {
+      navigate("/auth/signup")
+    }
+  } 
 
   return (
     <div className="bg-white text-gray-900 ">
@@ -48,14 +58,18 @@ const Landing = () => {
             </a>
           </nav>
 
-          <button
-            onClick={() => {
-              handleSignOut();
-            }}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 cursor-pointer rounded-lg text-sm"
-          >
-            {isSignedIn ? "Sign Out" : "Sign up"}
-          </button>
+          {isLoaded ? (
+            <button
+              onClick={() => {
+                handleSignOut();
+              }}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 cursor-pointer rounded-lg text-sm"
+            >
+              {isSignedIn ? "Sign Out" : "Sign up"}
+            </button>
+          ) : (
+            <Skeleton className="h-9 w-22 bg-slate-400 rounded-lg" />
+          )}
         </div>
       </header>
       {/* Hero */}
@@ -71,9 +85,15 @@ const Landing = () => {
           </p>
 
           <div className="mt-6 flex gap-4">
-            <button className="bg-blue-500 font-semibold text-sm hover:bg-blue-600 text-white px-6 py-3 rounded-lg">
-              Get Started
-            </button>
+            {isLoaded ? (
+              <button
+                onClick={() => {handleClick()}}
+               className="bg-blue-500 cursor-pointer font-semibold text-sm hover:bg-blue-600 text-white px-6 py-3 rounded-lg">
+                {isSignedIn ? "Dashboard" : "Get Started"}
+              </button>
+            ) : (
+              <Skeleton className="h-11 w-30 bg-slate-400 rounded-lg" />
+            )}
             <button className="border flex items-center justify-center text-xs font-bold px-6 py-3 rounded-lg">
               <MdOutlineExplore></MdOutlineExplore>View Demo
             </button>
