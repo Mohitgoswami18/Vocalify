@@ -1,7 +1,7 @@
 import {
-    LineChart,
-    Line,
-    XAxis,
+  LineChart,
+  Line,
+  XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
@@ -9,48 +9,77 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 /* ---------------- mock data ---------------- */
 
 const metrics = [
-    { title: "Overall Performance", value: 85, subtitle: "Consistent progress" },
-    { title: "Confidence", value: 92, subtitle: "Strong presence" },
-    { title: "Clarity", value: 88, subtitle: "Clear articulation" },
-    { title: "Fluency", value: 80, subtitle: "Smooth delivery" },
-    { title: "Accent", value: 75, subtitle: "Neutral clarity" },
+  { title: "Overall Performance", value: 85, subtitle: "Consistent progress" },
+  { title: "Confidence", value: 92, subtitle: "Strong presence" },
+  { title: "Clarity", value: 88, subtitle: "Clear articulation" },
+  { title: "Fluency", value: 80, subtitle: "Smooth delivery" },
+  { title: "Accent", value: 75, subtitle: "Neutral clarity" },
 ];
 
 const waveform = [
-    { time: "0:00", score: 60 },
-    { time: "0:15", score: 70 },
-    { time: "0:30", score: 78 },
-    { time: "0:45", score: 82 },
+  { time: "0:00", score: 60 },
+  { time: "0:15", score: 70 },
+  { time: "0:30", score: 78 },
+  { time: "0:45", score: 82 },
   { time: "1:00", score: 85 },
 ];
 
 const recommendations = [
-    {
-        title: "Vocal Warm-up Exercises",
-        desc: "Spend 5 minutes warming up your voice before presentations.",
-    },
-    {
+  {
+    title: "Vocal Warm-up Exercises",
+    desc: "Spend 5 minutes warming up your voice before presentations.",
+  },
+  {
     title: "Pacing Control",
     desc: "Slow down slightly during key points for better clarity.",
-},
-{
+  },
+  {
     title: "Confidence Building",
     desc: "Practice emphasizing keywords to strengthen delivery.",
-},
+  },
 ];
 
 const comparison = [
-    { metric: "Confidence", current: 92, previous: 85 },
-    { metric: "Clarity", current: 88, previous: 82 },
-    { metric: "Fluency", current: 80, previous: 78 },
+  { metric: "Confidence", current: 92, previous: 85 },
+  { metric: "Clarity", current: 88, previous: 82 },
+  { metric: "Fluency", current: 80, previous: 78 },
 ];
+
 /* ---------------- component ---------------- */
 
 const AnalysisResult = () => {
+  const [loading, setLoading] = useState(true);
+
+  /* -------- simulate API fetch -------- */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false); // replace with real API completion
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  /* ================= LOADING STATE ================= */
+  if (loading) {
+    return (
+      <div className="h-[70vh] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+        <h2 className="text-lg font-semibold">Analyzing your voice…</h2>
+        <p className="text-sm text-muted-foreground text-center max-w-sm">
+          We’re processing your audio and generating personalized insights. This
+          usually takes a few seconds.
+        </p>
+      </div>
+    );
+  }
+
+  /* ================= RESULT UI ================= */
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -123,18 +152,6 @@ const AnalysisResult = () => {
         </CardContent>
       </Card>
 
-      {/* Segment Breakdown (UI Placeholder) */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Per-Segment Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <div>Segment 1 (0:00 – 0:30)</div>
-          <div>Segment 2 (0:30 – 1:00)</div>
-          <div>Segment 3 (1:00 – 1:30)</div>
-        </CardContent>
-      </Card>
-
       {/* Performance Comparison */}
       <Card>
         <CardHeader>
@@ -166,4 +183,16 @@ const AnalysisResult = () => {
     </div>
   );
 };
-export default AnalysisResult
+
+export default AnalysisResult;
+
+//  Replace this
+// setTimeout(() => {
+//   setLoading(false);
+//   setProgress(100);
+// }, 2500);
+
+// with this
+// await fetchDataFromBackend();
+// setLoading(false);
+// setProgress(100);
