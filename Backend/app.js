@@ -9,6 +9,7 @@ dotenv.config({ path: "./.env" });
 app.use(cors({ origin: process.env.ORIGIN, credentials: true }));
 app.use(cookieParser());
 app.use(express.json({ limit: "16kb" }));
+app.use("/api/v1/webhooks", express.raw({ type: "application/json" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use("/static", express.static("public"));
 
