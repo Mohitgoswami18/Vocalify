@@ -147,7 +147,28 @@ const AnalysisResult = () => {
     fetchDataFromBackend();
   }, []);
 
-  
+  if(useResult){
+    const handleHistoryUpdation = async () => {
+      const response = await axios.post(
+        "http://localhost:8000/api/v1/user/get-history",
+        {
+          username: username,
+          confidence: useResult?.emotion.confidence || 0,
+          clarity: useResult?.clarity || 0,
+          fluency: useResult?.fluency || 0,
+          accent: useResult?.accent || 0,
+          overallScore: useResult?.overallScore || 0,
+          audioUrl: audioUrl,
+          transcript: useResult?.transcript || null,
+          duration: useResult?.duration || 0,
+          source: "analysis",
+        },
+      );
+      console.log("History updated:", response.data);
+
+      handleHistoryUpdation();
+    };
+  }
 
   /* ================= LOADING STATE ================= */
   if (loading) {

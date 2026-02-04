@@ -4,6 +4,12 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema(
   {
+    clerkId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    
     username: {
       type: String,
       required: true,
