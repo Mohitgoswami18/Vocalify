@@ -1,6 +1,5 @@
 import { Webhook } from "svix";
-import { ApiResponse } from "../Utils/ApiResponse.js";
-import { User } from "../models/user.model.js";
+import { User } from "../schema/user.model.js";
 
 const secret = process.env.WEBHOOK_SECRET;
 
@@ -31,14 +30,14 @@ const webhookHandler = async (req, res) => {
       if (!email || !id) {
         return res
           .status(400)
-          .json(new ApiResponse("error", "Missing required user information"));
+          .json({ status: "error", message: "Missing required user information" });
       }
 
       const existingUser = await User.findOne({ clerkId: id });
       if (existingUser) {
         return res
           .status(200)
-          .json(new ApiResponse("success", "User already exists"));
+          .json({ status: "success", message: "User already exists" });
       }
 
       await User.create({
@@ -50,24 +49,24 @@ const webhookHandler = async (req, res) => {
 
       return res
         .status(200)
-        .json(new ApiResponse("success", "Webhook processed successfully"));
+        .json({ status: "success", message: "Webhook processed successfully" });
     }
 
     return res
       .status(200)
-      .json(new ApiResponse("success", "Event received but not processed"));
+      .json({ status: "success", message: "Event received but not processed" });
   } catch (error) {
     console.error("Webhook error:", error);
 
     if (error.message?.includes("Webhook signature verification failed")) {
       return res
         .status(400)
-        .json(new ApiResponse("error", "Invalid webhook signature"));
+        .json({ status: "error", message: "Invalid webhook signature" });
     }
 
     return res
       .status(500)
-      .json(new ApiResponse("error", "Internal Server Error"));
+      .json({ status: "error", message: "Internal Server Error" });
   }
 };
 

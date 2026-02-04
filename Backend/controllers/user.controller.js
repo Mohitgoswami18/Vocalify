@@ -72,7 +72,7 @@ const analysisPipelineController = async (req, res) => {
       return res.status(500).json({ error: "Model prediction failed" });
     }
 
-    
+    fs.unlinkSync(userAudioPath);
 
     return res.status(200).json(modelPredictions.data);
   } catch (error) {
