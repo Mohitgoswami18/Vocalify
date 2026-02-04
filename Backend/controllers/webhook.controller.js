@@ -1,5 +1,5 @@
 import { Webhook } from "svix";
-import { User } from "../schema/user.model.js";
+import User from "../schema/user.model.js";
 
 const secret = process.env.WEBHOOK_SECRET;
 
