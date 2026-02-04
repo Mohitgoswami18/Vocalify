@@ -17,7 +17,7 @@ const AnalyzeVoice = () => {
     } else {
       // Handle file upload option
       navigate(`/:${username}/analysisResult`, {
-        state: { userAudio: audioFile },
+        state: { userAudio: audioFile, username: username },
       });
     }
   };

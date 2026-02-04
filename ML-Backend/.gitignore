@@ -1,0 +1,4 @@
+ML-Backend/venv/
+# Virtual environments (any depth)
+**/.venv/
+**/venv/

@@ -1,69 +1,153 @@
 import {
   LineChart,
   Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-
-/* ---------------- mock data ---------------- */
-
-const metrics = [
-  { title: "Overall Performance", value: 85, subtitle: "Consistent progress" },
-  { title: "Confidence", value: 92, subtitle: "Strong presence" },
-  { title: "Clarity", value: 88, subtitle: "Clear articulation" },
-  { title: "Fluency", value: 80, subtitle: "Smooth delivery" },
-  { title: "Accent", value: 75, subtitle: "Neutral clarity" },
-];
-
-const waveform = [
-  { time: "0:00", score: 60 },
-  { time: "0:15", score: 70 },
-  { time: "0:30", score: 78 },
-  { time: "0:45", score: 82 },
-  { time: "1:00", score: 85 },
-];
-
-const recommendations = [
-  {
-    title: "Vocal Warm-up Exercises",
-    desc: "Spend 5 minutes warming up your voice before presentations.",
-  },
-  {
-    title: "Pacing Control",
-    desc: "Slow down slightly during key points for better clarity.",
-  },
-  {
-    title: "Confidence Building",
-    desc: "Practice emphasizing keywords to strengthen delivery.",
-  },
-];
-
-const comparison = [
-  { metric: "Confidence", current: 92, previous: 85 },
-  { metric: "Clarity", current: 88, previous: 82 },
-  { metric: "Fluency", current: 80, previous: 78 },
-];
+import axios from "axios"
+import Waveform from "./Waveform.jsx"
 
 /* ---------------- component ---------------- */
 
 const AnalysisResult = () => {
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const [useResult, setUseResult] = useState(null);
+  const [prevUserData, setPrevUserData] = useState(null);
+  const userAudio = location.state?.userAudio || "not recieved";
+  const username = location.state?.username || "default";
+  const [audioUrl, setAudioUrl] = useState(null);
+  const formData = new FormData();
+  if (userAudio) {
+    formData.append("audio", userAudio);
+  }
+  console.log(useResult);
+  console.log(prevUserData)
+
+  /* ---------------- mock data ---------------- */
+
+  const trendData = [
+    {
+      name: "Previous",
+      Confidence: prevUserData?.prevMetrics.confidence || 0,
+      Fluency: prevUserData?.prevMetrics.fluency || 0,
+      Clarity: prevUserData?.prevMetrics.clarity || 0,
+      Accent: prevUserData?.prevMetrics.accent || 0,
+    },
+    {
+      name: "Current",
+      Confidence: useResult?.emotion.confidence || 0,
+      Fluency: useResult?.fluency || 0,
+      Clarity: useResult?.clarity || 0,
+      Accent: useResult?.accent || 0,
+    },
+  ];
+
+  const comparisonData = [
+    {
+      metric: "Confidence",
+      Previous: prevUserData?.prevMetrics.confidence || 0,
+      Current: useResult?.emotion.confidence || 0,
+    },
+    { metric: "Fluency", Previous: prevUserData?.prevMetrics.fluency || 0, Current: useResult?.fluency || 0 },
+    { metric: "Clarity", Previous: prevUserData?.prevMetrics.clarity || 0, Current: useResult?.clarity || 0 },
+    { metric: "Accent", Previous: prevUserData?.prevMetrics.accent || 0, Current: useResult?.accent || 0 },
+  ];
+
+  const metrics = [
+    { label: "Confidence", value: useResult?.emotion.confidence || 0 },
+    { label: "Fluency", value: useResult?.fluency || 0 },
+    { label: "Clarity", value: useResult?.clarity || 0 },
+    { label: "Accent", value: useResult?.accent || 0 },
+  ];
+
+  const exerciseMap = {
+    confidence: [
+      "Practice speaking in front of a mirror.",
+      "Emphasize key words while speaking.",
+      "Record yourself and analyze tone variations.",
+    ],
+    clarity: [
+      "Practice tongue twisters daily.",
+      "Slow down your speech for better articulation.",
+      "Focus on pronouncing ending consonants clearly.",
+    ],
+    fluency: [
+      "Practice reading aloud without pauses.",
+      "Reduce filler words by pausing silently.",
+      "Use breathing techniques to maintain flow.",
+    ],
+    accent: [
+      "Listen and repeat native pronunciation samples.",
+      "Practice vowel and consonant sounds separately.",
+      "Shadow native speakers using short audio clips.",
+    ],
+  };
+
+  const sortedScores = [...metrics].sort((a, b) => a.value - b.value);
+  const lowestTwo = sortedScores.slice(0, 2);
+
+
+  useEffect(() => {
+    if (!username) return;
+    // Fetch user data
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/v1/user/details?username=${username}`,
+        );
+        setPrevUserData(response.data.user);
+        // console.log("User Data:", response.data.user);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, [username]);
+
+  useEffect(() => {
+    if (!userAudio) return;
+
+    const url = URL.createObjectURL(userAudio);
+    setAudioUrl(url);
+
+    return () => URL.revokeObjectURL(url);
+  }, [userAudio]);
 
   /* -------- simulate API fetch -------- */
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false); // replace with real API completion
-    }, 3000);
+    const fetchDataFromBackend = async () => {
+      try {
+        const response = await axios.post(
+          "http://localhost:8000/api/v1/api/analyze-audio-result",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          },
+        );
+        setUseResult(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching analysis result:", error);
+        setLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    fetchDataFromBackend();
   }, []);
+
+  
 
   /* ================= LOADING STATE ================= */
   if (loading) {
@@ -79,120 +163,114 @@ const AnalysisResult = () => {
     );
   }
 
-  /* ================= RESULT UI ================= */
-  return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">
-            Pitch Deck Presentation Practice
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Post-analysis performance insights
-          </p>
-        </div>
+  if (!useResult) {
+    return (
+      <div className="h-[70vh] flex flex-col items-center justify-center gap-4">
+        <h2 className="text-lg font-semibold">No analysis results available</h2>
+        <p className="text-sm text-muted-foreground text-center max-w-sm">
+          Please ensure your audio was processed correctly.
+        </p>
+      </div>
+    );
+  }
 
-        <div className="flex gap-2">
-          <Button variant="outline">Share</Button>
-          <Button variant="outline">Export</Button>
+  return (
+    <div className="max-w-3xl mx-auto space-y-8">
+      {/* ================= OVERALL SCORE ================= */}
+      <div className="bg-blue-50 rounded-xl p-6 text-center">
+        <p className="text-4xl font-bold text-blue-600">
+          {useResult?.overallScore || 0}
+        </p>
+        <p className="text-sm text-gray-600 mt-1">Overall Score</p>
+
+        <div className="flex justify-center gap-4 font-bold text-xs text-gray-500 mt-2">
+          <span>Emotion: {useResult?.emotion.label || "unknown"}</span>
+          <span>Age: {useResult?.age?.label || "unknown"}</span>
+          <span>Gender: {useResult?.gender?.label || "unknown"}</span>
         </div>
       </div>
 
-      {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      {/* ================= METRIC BREAKDOWN ================= */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {metrics.map((item) => (
-          <Card key={item.title}>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">{item.title}</p>
-              <p className="text-3xl font-bold mt-1">{item.value}%</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {item.subtitle}
-              </p>
-            </CardContent>
-          </Card>
+          <div key={item.label} className="bg-white border rounded-xl p-4">
+            <div className="flex justify-between text-sm">
+              <span>{item.label}</span>
+              <span className="font-semibold">{item.value}%</span>
+            </div>
+
+            <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-blue-500"
+                style={{ width: `${item.value}%` }}
+              />
+            </div>
+          </div>
         ))}
       </div>
 
-      {/* Waveform Timeline */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Waveform Timeline</CardTitle>
-        </CardHeader>
-        <CardContent className="h-56">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={waveform}>
+      {/* ================= AUDIO ANALYSIS ================= */}
+      <div className="bg-white border rounded-xl p-4">
+        <div className="bg-white border rounded-xl p-5">
+          <h3 className="font-semibold mb-3 text-sm">Audio Analysis</h3>
+          <Waveform audioUrl={audioUrl} />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* ================= CHARTS SECTION ================= */}
+        {/* Metric Trends */}
+        <div className="bg-white border rounded-xl p-4">
+          <h3 className="font-semibold mb-3 text-sm">Metric Trends</h3>
+
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={trendData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="time" />
-              <YAxis />
+              <XAxis dataKey="name" />
+              <YAxis domain={[60, 100]} />
               <Tooltip />
-              <Line
-                type="monotone"
-                dataKey="score"
-                stroke="#3b82f6"
-                strokeWidth={2}
-              />
+              <Line dataKey="Confidence" stroke="#3b82f6" strokeWidth={2} />
+              <Line dataKey="Fluency" stroke="#22c55e" strokeWidth={2} />
+              <Line dataKey="Clarity" stroke="#a855f7" strokeWidth={2} />
+              <Line dataKey="Accent" stroke="#f97316" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Recommendations */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">AI Recommendations</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {recommendations.map((rec, i) => (
-            <div key={i} className="border rounded-lg p-3">
-              <p className="font-medium">{rec.title}</p>
-              <p className="text-sm text-muted-foreground">{rec.desc}</p>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+        {/* Performance Comparison */}
+        <div className="bg-white border rounded-xl p-4">
+          <h3 className="font-semibold mb-3 text-sm">Performance Comparison</h3>
 
-      {/* Performance Comparison */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Performance Comparison</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {comparison.map((item) => (
-            <div
-              key={item.metric}
-              className="border rounded-xl p-4 text-center"
-            >
-              <p className="text-sm text-muted-foreground">{item.metric}</p>
-              <p className="text-lg font-semibold mt-1">
-                {item.current}{" "}
-                <span className="text-xs text-muted-foreground">current</span>
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {item.previous} previous
-              </p>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={comparisonData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="metric" />
+              <YAxis domain={[60, 100]} />
+              <Tooltip />
+              <Bar dataKey="Previous" fill="#c7d2fe" />
+              <Bar dataKey="Current" fill="#3b82f6" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
-      {/* CTA */}
-      <div className="flex justify-center">
-        <Button size="lg">Practice Suggested Exercises</Button>
+      {/* ================= SUGGESTED EXERCISES ================= */}
+      <div className="bg-white border rounded-xl p-5">
+        <h3 className="font-semibold mb-3">
+          Suggested Exercises (Focus Areas)
+        </h3>
+
+        <ul className="list-disc list-inside text-sm text-gray-600 space-y-2">
+          {lowestTwo.map(({ label }) => {
+            const metricKey = label.toLowerCase();
+
+            return exerciseMap[metricKey]?.map((exercise, i) => (
+              <li key={`${metricKey}-${i}`}>{exercise}</li>
+            ));
+          })}
+        </ul>
       </div>
     </div>
   );
-};
+};;
 
 export default AnalysisResult;
-
-//  Replace this
-// setTimeout(() => {
-//   setLoading(false);
-//   setProgress(100);
-// }, 2500);
-
-// with this
-// await fetchDataFromBackend();
-// setLoading(false);
-// setProgress(100);

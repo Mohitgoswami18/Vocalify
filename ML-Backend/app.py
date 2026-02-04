@@ -14,12 +14,11 @@ def root():
     return {"status": "ML API running"}
 
 @app.post("/analyze/speech")
-async def analyze_speech(file: UploadFile = File(...)):
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
+async def analyze_speech(userAudio: UploadFile = File(...)):
+    file_path = os.path.join(UPLOAD_DIR, userAudio.filename)
 
     with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
+        shutil.copyfileobj(userAudio.file, buffer)
     emotion_result = predict_emotion(file_path)
 
     os.remove(file_path)
