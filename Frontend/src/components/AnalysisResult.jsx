@@ -30,7 +30,7 @@ const AnalysisResult = () => {
     formData.append("audio", userAudio);
   }
   console.log(useResult);
-  console.log(prevUserData)
+  console.log(prevUserData);
 
   /* ---------------- mock data ---------------- */
 
@@ -57,9 +57,21 @@ const AnalysisResult = () => {
       Previous: prevUserData?.prevMetrics.confidence || 0,
       Current: useResult?.emotion.confidence || 0,
     },
-    { metric: "Fluency", Previous: prevUserData?.prevMetrics.fluency || 0, Current: useResult?.fluency || 0 },
-    { metric: "Clarity", Previous: prevUserData?.prevMetrics.clarity || 0, Current: useResult?.clarity || 0 },
-    { metric: "Accent", Previous: prevUserData?.prevMetrics.accent || 0, Current: useResult?.accent || 0 },
+    {
+      metric: "Fluency",
+      Previous: prevUserData?.prevMetrics.fluency || 0,
+      Current: useResult?.fluency || 0,
+    },
+    {
+      metric: "Clarity",
+      Previous: prevUserData?.prevMetrics.clarity || 0,
+      Current: useResult?.clarity || 0,
+    },
+    {
+      metric: "Accent",
+      Previous: prevUserData?.prevMetrics.accent || 0,
+      Current: useResult?.accent || 0,
+    },
   ];
 
   const metrics = [
@@ -95,14 +107,13 @@ const AnalysisResult = () => {
   const sortedScores = [...metrics].sort((a, b) => a.value - b.value);
   const lowestTwo = sortedScores.slice(0, 2);
 
-
   useEffect(() => {
     if (!username) return;
     // Fetch user data
     const fetchUserData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/v1/user/details?username=${username}`,
+          `http://localhost:10000/api/v1/user/details?username=${username}`,
         );
         setPrevUserData(response.data.user);
         // console.log("User Data:", response.data.user);
@@ -128,7 +139,7 @@ const AnalysisResult = () => {
     const fetchDataFromBackend = async () => {
       try {
         const response = await axios.post(
-          "http://localhost:8000/api/v1/api/analyze-audio-result",
+          "http://localhost:10000/api/v1/api/analyze-audio-result",
           formData,
           {
             headers: {
@@ -147,28 +158,36 @@ const AnalysisResult = () => {
     fetchDataFromBackend();
   }, []);
 
-  if(useResult){
-    const handleHistoryUpdation = async () => {
-      const response = await axios.post(
-        "http://localhost:8000/api/v1/user/get-history",
-        {
-          username: username,
-          confidence: useResult?.emotion.confidence || 0,
-          clarity: useResult?.clarity || 0,
-          fluency: useResult?.fluency || 0,
-          accent: useResult?.accent || 0,
-          overallScore: useResult?.overallScore || 0,
-          audioUrl: audioUrl,
-          transcript: useResult?.transcript || null,
-          duration: useResult?.duration || 0,
-          source: "analysis",
-        },
-      );
-      console.log("History updated:", response.data);
+  useEffect(() => {
+    if (!useResult) return;
 
-      handleHistoryUpdation();
+    const handleHistoryUpdation = async () => {
+      try {
+        const response = await axios.post(
+          "http://localhost:10000/api/v1/user/get-history",
+          {
+            username: username,
+            confidence: useResult?.emotion?.confidence || 0,
+            clarity: useResult?.clarity || 0,
+            fluency: useResult?.fluency || 0,
+            accent: useResult?.accent || 0,
+            overallScore: useResult?.overallScore || 0,
+            audioUrl: audioUrl,
+            transcript: useResult?.transcript || null,
+            duration: useResult?.duration || 0,
+            source: "record",
+          },
+        );
+
+        console.log("History updated:", response.data);
+      } catch (error) {
+        console.log(error.response?.status);
+        console.log(error.response?.data);
+      }
     };
-  }
+
+    handleHistoryUpdation();
+  }, [useResult]);
 
   /* ================= LOADING STATE ================= */
   if (loading) {

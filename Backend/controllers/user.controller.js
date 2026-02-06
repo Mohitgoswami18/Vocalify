@@ -21,14 +21,12 @@ const dashboardController = async (req, res) => {
 const historyFetchController = async (req, res) => {
   try {
     const { username } = req.query;
+
     if (!username) {
       return res.status(400).json({ error: "Username parameter is required" });
     }
 
-    const userData = await User.findOne({ username }).populate({
-      path: "history",
-      options: { sort: { createdAt: 1 } }, // oldest → newest
-    });
+    const userData = await User.findOne({ username }).populate("history"); // 🔥 only this
 
     if (!userData) {
       return res.status(404).json({ error: "User not found" });
@@ -41,54 +39,87 @@ const historyFetchController = async (req, res) => {
   }
 };
 
+
 const historyUpdationPipeline = async (req, res) => {
-  try{
-    const {username, confidence, clarity, fluency, accent, overallScore, audioUrl, transcript, duration, source} = req.body;
-    if(!username || !confidence || !clarity || !fluency || !accent || !overallScore){
+  try {
+    console.log("Received history update request with body:", req.body);
+
+    const {
+      username,
+      confidence,
+      clarity,
+      fluency,
+      accent,
+      overallScore,
+      audioUrl,
+      transcript,
+      duration,
+      source,
+    } = req.body;
+
+    // ✅ proper validation (0 allowed)
+    if (
+      !username ||
+      confidence == null ||
+      clarity == null ||
+      fluency == null ||
+      accent == null ||
+      overallScore == null
+    ) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     const user = await User.findOne({ username });
-    if(!user) {
+
+    if (!user) {
       console.log("User not found for username:", username);
       return res.status(404).json({ error: "User not found" });
     }
 
+    console.log("User found:", user);
+
     const newHistoryEntry = {
       user: user._id,
       metrics: {
-        confidence: confidence,
-        clarity: clarity,
-        fluency: fluency,
-        accent: accent,
-        overallScore: overallScore,
+        confidence,
+        clarity,
+        fluency,
+        accent,
       },
-      audioUrl: audioUrl || null,
-      transcript: transcript || null,
-      duration: duration || 0,
-      source: source || null,
+      overallScore,
+      audioUrl: audioUrl ?? null,
+      transcript: transcript ?? null,
+      duration: duration ?? 0,
+      source: source ?? null,
     };
 
+    // ✅ create already saves
     const historyEntry = await History.create(newHistoryEntry);
+
+    // ✅ update user history
     user.history.push(historyEntry._id);
     await user.save();
-    await History.save();
 
-    return res.status(200).json({ message: "History updated successfully", historyEntry });
+    console.log("New history entry created:", historyEntry);
+
+    return res.status(200).json({
+      message: "History updated successfully",
+      historyEntry,
+    });
   } catch (error) {
     console.error("Error in historyUpdationPipeline:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
-}
+};
 
 const analysisPipelineController = async (req, res) => {
   try {
     const userAudioPath = req.file?.path;
-    if(!userAudioPath) {
+    if (!userAudioPath) {
       return res.status(400).json({ error: "Audio file is required" });
     }
     console.log("Received audio file path:", userAudioPath);
-  
+
     const formData = new FormData();
     formData.append(
       "userAudio",
@@ -96,7 +127,6 @@ const analysisPipelineController = async (req, res) => {
       req.file.originalname,
     );
 
-  
     const modelPredictions = await axios.post(
       "http://127.0.0.1:8000/analyze/speech",
       formData,
@@ -105,19 +135,16 @@ const analysisPipelineController = async (req, res) => {
       },
     );
 
-    if(!modelPredictions) {
+    if (!modelPredictions) {
       return res.status(500).json({ error: "Model prediction failed" });
     }
-
-    fs.unlinkSync(userAudioPath);
 
     return res.status(200).json(modelPredictions.data);
   } catch (error) {
     console.error("Error in analysis pipeline:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
-
-}
+};
 export {
   dashboardController,
   historyFetchController,

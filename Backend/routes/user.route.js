@@ -9,6 +9,6 @@ const router =Router()
 
 router.route("/user/details").get(dashboardController)
 router.route("/user/history").get(historyFetchController)
-router.route("/user/get-history").get(historyUpdationPipeline);
+router.route("/user/get-history").post(historyUpdationPipeline);
 router.route("/api/analyze-audio-result").post(upload.single("audio"), analysisPipelineController);
 export default router;

@@ -6,6 +6,7 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useSignUp, useUser } from "@clerk/clerk-react";
 import {toast} from "sonner"
 import { Spinner } from "@/components/ui/spinner"
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -15,7 +16,11 @@ const Signup = () => {
   const { isLoaded, setActive, signUp } = useSignUp();
   const [googleLoading, setGoogleLoading] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(false)
+  const [loading, setLoading] = useState(false) 
+  const [code, setCode] = useState("");
+  const [error, setError] = useState(false)
   const { user } = useUser(); 
+  const navigate = useNavigate();
 
   const handleGoogleSignUp = async () => {
     setGoogleLoading(true);
@@ -129,7 +134,7 @@ const Signup = () => {
           <div className="flex-1 h-px bg-gray-300" />
         </div>
         {!pendingVerification ? (
-          <form className="space-y-4" onSubmit={() => {handleSignUp}}>
+          <form className="space-y-4" onSubmit={(e) => handleSignUp(e)}>
             <input
               type="text"
               placeholder="Full name"

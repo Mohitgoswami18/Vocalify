@@ -2,7 +2,10 @@ from fastapi import FastAPI, UploadFile, File
 import shutil
 import os
 
-from emotion_inference import predict_emotion
+from model_inference.emotion_inference import predict_emotion
+from model_inference.age_inference import predict_age
+from model_inference.gender_inference import predict_gender 
+from model_inference.accent_inference import predict_accent 
 
 app = FastAPI()
 
@@ -20,13 +23,16 @@ async def analyze_speech(userAudio: UploadFile = File(...)):
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(userAudio.file, buffer)
     emotion_result = predict_emotion(file_path)
+    gender_result = predict_gender(file_path)
+    age_result = predict_age(file_path)
+    accent_result = predict_accent(file_path)
 
     os.remove(file_path)
 
     return {
         "status": "success",
         "emotion": emotion_result,
-        "age": None,
-        "gender": None,
-        "accent": None
+        "age": age_result,
+        "gender": gender_result,
+        "accent": accent_result
     }

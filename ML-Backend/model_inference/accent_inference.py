@@ -2,7 +2,7 @@ import torch
 import librosa
 import numpy as np
 from transformers import Wav2Vec2Processor, Wav2Vec2Model
-from emotion_model_def import EmotionModel
+from model_def.accent_model_def import Accent_classifier
 
 DEVICE = torch.device("cpu")
 
@@ -20,16 +20,15 @@ for param in wav2vec_model.parameters():
     param.requires_grad = False
 
 # 2️⃣ Load Emotion Classifier
-model = EmotionModel()
+model = Accent_classifier()
 model.load_state_dict(
-    torch.load("models/emotion_model.pth", map_location=DEVICE)
+    torch.load("models/accent.model.pth", map_location=DEVICE)
 )
 model.to(DEVICE)
 model.eval()
 
-EMOTION_LABELS = [
-    "neutral", "calm", "happy", "sad",
-    "angry", "fearful", "disgust", "surprised"
+ACCENT_LABELS = [
+    "Indian", "East_Asian", "Southeast_Asian", "Middle_Eastern", "African", "European_Romance", "European_Germanic", "European_Slavic", "Central_Asian", "Pacific_Islander", "Indigenous_American"
 ]
 
 # 3️⃣ Audio → Embeddings
@@ -55,7 +54,7 @@ def extract_wav2vec_embedding(audio_path):
     return hidden_states # [1, 768]
 
 # 4️⃣ Prediction
-def predict_emotion(audio_path):
+def predict_accent(audio_path):
     embedding = extract_wav2vec_embedding(audio_path)
 
     with torch.no_grad():
@@ -64,6 +63,5 @@ def predict_emotion(audio_path):
         score, idx = torch.max(probs, dim=1)
 
     return {
-        "label": EMOTION_LABELS[idx.item()],
-        "confidence": round(score.item() * 100, 2)
+        "label": ACCENT_LABELS[idx.item()],
     }

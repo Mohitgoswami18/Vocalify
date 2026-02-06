@@ -87,11 +87,11 @@ const History = () => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/v1/user/details?username=${username}`,
+          `http://localhost:10000/api/v1/user/history?username=${username}`,
         );
         setDataLoaded(true);
-        setUserData(response.data.user);
-        // console.log("User Data:", response.data.user);
+        setUserData(response.data);
+        // console.log("User Data:", response.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }

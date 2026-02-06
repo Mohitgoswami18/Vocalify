@@ -25,7 +25,7 @@ const SsoCallback = () => {
           "User signed in, redirecting to:",
           `/${userUsername}/dashboard`,
         );
-            navigate(`${userUsername}/dashboard`);
+            navigate(`/${userUsername}/dashboard`);
         return;
       }
 
@@ -67,8 +67,8 @@ const SsoCallback = () => {
           result,
         );
         await setActive({ session: result.createdSessionId });
-        console.log("Signup completed, redirecting to dashboard");
-        navigate(`${username}/dashboard`);
+        console.log("Signup completed, redirecting to dashboard", `${username}/dashboard`);
+        navigate(`/${username}/dashboard`);
       } else {
         console.log("Signup still incomplete:", result.status);
         setError("Failed to complete signup. Please try again.");

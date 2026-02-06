@@ -13,10 +13,10 @@ const AnalyzeVoice = () => {
 
   const handleClick = () => {
     if (selectedOption == "record") {
-      navigate(`/:${username}/recording`);
+      navigate(`/${username}/recording`);
     } else {
       // Handle file upload option
-      navigate(`/:${username}/analysisResult`, {
+      navigate(`/${username}/analysisResult`, {
         state: { userAudio: audioFile, username: username },
       });
     }

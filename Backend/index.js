@@ -5,6 +5,7 @@ dotenv.config({ path: "./.env" });
 import connectToDatabase from "./database/database.js";
 
 const port = process.env.PORT || 8000;
+console.log(port)
 
 app.get("/", (req, res) => {
   res.send("the server is running fine");
