@@ -25,6 +25,7 @@ const AnalysisResult = () => {
   const userAudio = location.state?.userAudio || "not recieved";
   const username = location.state?.username || "default";
   const [audioUrl, setAudioUrl] = useState(null);
+  const method =  location.state?.method || "upload";
   const formData = new FormData();
   if (userAudio) {
     formData.append("audio", userAudio);
@@ -47,7 +48,7 @@ const AnalysisResult = () => {
       Confidence: useResult?.emotion.confidence || 0,
       Fluency: useResult?.fluency || 0,
       Clarity: useResult?.clarity || 0,
-      Accent: useResult?.accent || 0,
+      Accent: useResult?.accent?.score || 0,
     },
   ];
 
@@ -55,30 +56,30 @@ const AnalysisResult = () => {
     {
       metric: "Confidence",
       Previous: prevUserData?.prevMetrics.confidence || 0,
-      Current: useResult?.emotion.confidence || 0,
+      Current: useResult?.other_features.scores.confidence || 0,
     },
     {
       metric: "Fluency",
       Previous: prevUserData?.prevMetrics.fluency || 0,
-      Current: useResult?.fluency || 0,
+      Current: useResult?.other_features.scores.fluency || 0,
     },
     {
       metric: "Clarity",
       Previous: prevUserData?.prevMetrics.clarity || 0,
-      Current: useResult?.clarity || 0,
+      Current: useResult?.other_features.scores.clarity || 0,
     },
     {
       metric: "Accent",
       Previous: prevUserData?.prevMetrics.accent || 0,
-      Current: useResult?.accent || 0,
+      Current: useResult?.accent.score || 0,
     },
   ];
 
   const metrics = [
     { label: "Confidence", value: useResult?.emotion.confidence || 0 },
-    { label: "Fluency", value: useResult?.fluency || 0 },
-    { label: "Clarity", value: useResult?.clarity || 0 },
-    { label: "Accent", value: useResult?.accent || 0 },
+    { label: "Fluency", value: useResult?.other_features.scores.fluency || 0 },
+    { label: "Clarity", value: useResult?.other_features.scores.clarity || 0 },
+    { label: "Accent", value: useResult?.accent?.score || 0 },
   ];
 
   const exerciseMap = {
@@ -168,14 +169,14 @@ const AnalysisResult = () => {
           {
             username: username,
             confidence: useResult?.emotion?.confidence || 0,
-            clarity: useResult?.clarity || 0,
-            fluency: useResult?.fluency || 0,
-            accent: useResult?.accent || 0,
-            overallScore: useResult?.overallScore || 0,
+            clarity: useResult?.other_features.scores.clarity || 0,
+            fluency: useResult?.other_features.scores.fluency || 0,
+            accent: useResult?.accent?.score || 0,
+            overallScore: useResult?.other_features.overallScore || 0,
             audioUrl: audioUrl,
             transcript: useResult?.transcript || null,
-            duration: useResult?.duration || 0,
-            source: "record",
+            duration: useResult?.other_features.duration_sec || 0,
+            source: method,
           },
         );
 
@@ -219,7 +220,7 @@ const AnalysisResult = () => {
       {/* ================= OVERALL SCORE ================= */}
       <div className="bg-blue-50 rounded-xl p-6 text-center">
         <p className="text-4xl font-bold text-blue-600">
-          {useResult?.overallScore || 0}
+          {useResult?.other_features?.overallScore?.value || 0}
         </p>
         <p className="text-sm text-gray-600 mt-1">Overall Score</p>
 
@@ -256,6 +257,116 @@ const AnalysisResult = () => {
           <Waveform audioUrl={audioUrl} />
         </div>
       </div>
+
+      {/* ================= DETAILED METRICS ================= */}
+      <div className="bg-white border rounded-xl p-5 space-y-6">
+        {/* Top Summary */}
+        <div className="bg-blue-50 rounded-lg p-4 flex flex-col sm:flex-row justify-between gap-4">
+          <div>
+            <p className="text-3xl font-bold text-blue-600">
+              {useResult?.other_features?.overallScore?.value || 0}%
+            </p>
+            <p className="text-sm text-gray-600">Overall Score</p>
+          </div>
+
+          <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+            <span>
+              Duration: {useResult?.other_features.duration_sec || 0}s
+            </span>
+            <span>
+              Total Words:
+              {useResult?.other_features?.total_words}
+            </span>
+            <span className=" px-2 rounded text-blue-700 text-xs font-medium">
+              WPM:{useResult?.other_features?.wpm || 0}
+            </span>
+          </div>
+        </div>
+
+        {/* Transcript */}
+        <div>
+          <h3 className="font-semibold text-sm mb-1">Transcript</h3>
+          <p className="text-sm text-gray-600 line-clamp-4">
+            {useResult?.other_features?.transcript ||
+              "Transcript not available."}
+          </p>
+        </div>
+
+        {/* Speech Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+          <div className="border rounded-lg p-3">
+            <p className="font-medium mb-2">Pauses</p>
+            <p>Count: {useResult?.other_features?.pauses?.count || 0}</p>
+            <p>
+              Avg Duration:{" "}
+              {useResult?.other_features?.pauses?.average_duration || 0}s
+            </p>
+            <p>Density: {useResult?.other_features?.pauses?.density || "0"}</p>
+          </div>
+
+          <div className="border rounded-lg p-3">
+            <p className="font-medium mb-2">Fillers</p>
+            <p>Count: {useResult?.other_features?.fillers?.count || 0}</p>
+          </div>
+
+          <div className="border rounded-lg p-3">
+            <p className="font-medium mb-2">Linguistics</p>
+            <p>
+              Lexical Diversity:{" "}
+              {useResult?.other_features?.linguistics?.lexical_diversity || "—"}
+            </p>
+            <p>
+              Avg Segment Length:{" "}
+              {useResult?.other_features?.linguistics?.average_segment_length ||
+                "—"}
+            </p>
+          </div>
+        </div>
+
+        {/* Detailed Scores */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+          {[
+            {
+              label: "Clarity",
+              value: useResult?.other_features?.scores?.clarity,
+            },
+            {
+              label: "Fluency",
+              value: useResult?.other_features?.scores?.fluency,
+            },
+            {
+              label: "Confidence",
+              value: useResult?.other_features?.scores?.confidence,
+            },
+            {
+              label: "Overall",
+              value: useResult?.other_features?.overallScore?.value || 0,
+            },
+          ].map((item) => (
+            <div
+              key={item.label}
+              className="border rounded-lg p-4 flex flex-col items-center"
+            >
+              <p className="text-lg font-bold">{item.value ?? 0}%</p>
+              <p className="text-xs text-gray-500 mt-1">{item.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-3">
+          <button className="border border-blue-500 text-blue-600 px-4 py-2 rounded-lg text-sm cursor-pointer">
+            Export Transcript
+          </button>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-sm text-gray-500 cursor-pointer"
+          >
+            Re-analyze
+          </button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* ================= CHARTS SECTION ================= */}
         {/* Metric Trends */}

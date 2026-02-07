@@ -59,23 +59,23 @@ const History = () => {
   const location = useLocation();
   const [dataLoaded, setDataLoaded] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [currentMetrics, setCurrentMetrics] = useState(null);
   const param = useParams();
   const username = param.username;
   const selectedMetric = location.state?.metric || null;
-  console.log(username);
-  console.log(userData)
+  console.log(currentMetrics)
   const comparison = {
     previous: {
-      Confidence: userData?.prevMetrics.confidence || 0,
-      Clarity: userData?.prevMetrics.clarity || 0,
-      Fluency: userData?.prevMetrics.fluency || 0,
-      Accent: userData?.prevMetrics.accent || 0,
+      Confidence: currentMetrics?.prevMetrics?.confidence || 0,
+      Clarity: currentMetrics?.prevMetrics?.clarity || 0,
+      Fluency: currentMetrics?.prevMetrics?.fluency || 0,
+      Accent: currentMetrics?.prevMetrics?.accent || 0,
     },
     current: {
-      Confidence: userData?.currentMetrics.confidence || 0,
-      Clarity: userData?.currentMetrics.clarity || 0,
-      Fluency: userData?.currentMetrics.fluency || 0,
-      Accent: userData?.currentMetrics.accent || 0,
+      Confidence: currentMetrics?.currentMetrics?.confidence || 0,
+      Clarity: currentMetrics?.currentMetrics?.clarity || 0,
+      Fluency: currentMetrics?.currentMetrics?.fluency || 0,
+      Accent: currentMetrics?.currentMetrics?.accent || 0,
     },
   };
 
@@ -97,7 +97,17 @@ const History = () => {
       }
     };
 
+    const fetchCurrentMetrics = async () => {
+      try {
+        const response = await axios.get(`http://localhost:10000/api/v1/user/details?username=${username}`);
+        setCurrentMetrics(response.data.user);
+      } catch (error) {
+        console.error("Error fetching current metrics:", error);
+      }
+    }
+
     fetchUserData();
+    fetchCurrentMetrics();
   }, [username]);
   useEffect(() => {
     if (selectedMetric) {

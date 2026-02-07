@@ -27,10 +27,6 @@ model.load_state_dict(
 model.to(DEVICE)
 model.eval()
 
-GENDER_LABELS = [
-    "male", "female"
-]
-
 RAW_GENDER_LABELS = ["male", "female", "famale"]
 
 def normalize_gender(label):
@@ -70,7 +66,7 @@ def predict_gender(audio_path):
         probs = torch.softmax(logits, dim=1)
         score, idx = torch.max(probs, dim=1)
 
-        gender = GENDER_LABELS[idx.item()]
+        gender = RAW_GENDER_LABELS[idx.item()]
 
     return {
         "label": normalize_gender(gender),

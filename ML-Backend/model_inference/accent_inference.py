@@ -64,4 +64,5 @@ def predict_accent(audio_path):
 
     return {
         "label": ACCENT_LABELS[idx.item()],
+        "score": round(score.item() * 100, 2)
     }

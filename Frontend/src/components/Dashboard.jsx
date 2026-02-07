@@ -20,9 +20,10 @@ const Dashboard = () => {
     }
 
     const change = ((curr - prev) / prev) * 100;
+    const sign = isPositive(prev, curr);
     let value = change.toString();
 
-    return change < 0 ? `-${value.slice(0, 4)}` : `+${value.slice(0, 4)}`
+    return sign ? `+${value.slice(0, 4)}` : `${value.slice(0, 4)}`;
   };
 
   const isPositive = (prev, curr) => {
@@ -51,8 +52,8 @@ const Dashboard = () => {
         userData?.currentMetrics.clarity || 0,
       ),
       positive: isPositive(
-        userData?.prevMetrics.confidence || 0,
-        userData?.currentMetrics.confidence || 0,
+        userData?.prevMetrics.clarity || 0,
+        userData?.currentMetrics.clarity || 0,
       ),
     },
     {
@@ -63,8 +64,8 @@ const Dashboard = () => {
         userData?.currentMetrics.fluency || 0,
       ),
       positive: isPositive(
-        userData?.prevMetrics.confidence || 0,
-        userData?.currentMetrics.confidence || 0,
+        userData?.prevMetrics.fluency || 0,
+        userData?.currentMetrics.fluency || 0,
       ),
     },
     {
@@ -75,8 +76,8 @@ const Dashboard = () => {
         userData?.currentMetrics.accent || 0,
       ),
       positive: isPositive(
-        userData?.prevMetrics.confidence || 0,
-        userData?.currentMetrics.confidence || 0,
+        userData?.prevMetrics.accent || 0,
+        userData?.currentMetrics.accent || 0,
       ),
     },
   ];
@@ -134,7 +135,7 @@ const Dashboard = () => {
                 </p>
 
                 <div
-                onClick={() => navigate(`/:${username}/history`, { state: { metric: item.title } })}
+                onClick={() => navigate(`/${username}/history`, { state: { metric: item.title } })}
                 className="mt-4 bg-blue-50 text-blue-600 text-xs rounded-lg py-2 text-center cursor-pointer">
                   Trend graph
                 </div>
@@ -159,7 +160,7 @@ const Dashboard = () => {
       <div className="flex flex-col sm:flex-row gap-4">
         <button
           onClick={() => {
-            navigate(`/:${username}/analyze`);
+            navigate(`/${username}/analyze`);
           }}
           className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2"
         >
@@ -168,7 +169,7 @@ const Dashboard = () => {
 
         <button
           onClick={() => {
-            navigate(`/:${username}/history`);
+            navigate(`/${username}/history`);
           }}
           className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2"
         >

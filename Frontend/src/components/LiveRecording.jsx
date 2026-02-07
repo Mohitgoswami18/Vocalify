@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Play, Square, RefreshCw } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
 
 const randomParagraphs = [
   "Public speaking is a valuable skill that improves with consistent practice and feedback.",
@@ -14,6 +15,9 @@ const RecordPractice = () => {
   const [seconds, setSeconds] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
+  const param = useParams();
+  const navigate = useNavigate();
+  const username = param.username;
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -87,6 +91,13 @@ const RecordPractice = () => {
     setText(random);
   };
 
+  /* ---------------- Analysing Logic ---------------- */
+  const handleSubmit = () => {
+    navigate(`/${username}/analysisResult`, {
+      state: { userAudio: audioBlob, username: username, method: "record" },
+    });
+  };
+
   const handleRecordingSaveLogic = () => {
     // Implement saving logic here
     return;
@@ -104,7 +115,9 @@ const RecordPractice = () => {
               setText("start Recording Now ...");
             }}
             className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg flex items-center justify-center gap-2 cursor-pointer"
-          >Prepare Your Text</button>
+          >
+            Prepare Your Text
+          </button>
 
           <button
             onClick={generateParagraph}
@@ -192,7 +205,6 @@ const RecordPractice = () => {
               ? "border cursor-pointer"
               : "border text-gray-400 cursor-not-allowed"
           }`}
-
           onClick={() => handleRecordingSaveLogic()}
         >
           Save Recording
@@ -205,6 +217,7 @@ const RecordPractice = () => {
               ? "bg-blue-500 hover:bg-blue-600 text-white cursor-pointer"
               : "bg-blue-200 text-white cursor-not-allowed"
           }`}
+          onClick={() => handleSubmit()}
         >
           Analyze Voice
         </button>

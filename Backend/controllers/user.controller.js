@@ -98,6 +98,23 @@ const historyUpdationPipeline = async (req, res) => {
 
     // ✅ update user history
     user.history.push(historyEntry._id);
+    
+    const updatedPreviousMetrics = {
+      confidence: user.currentMetrics.confidence,
+      clarity: user.currentMetrics.clarity,
+      fluency: user.currentMetrics.fluency,
+      accent: user.currentMetrics.accent,
+    };
+
+    const updatedCurrentMetrics = {
+      confidence,
+      clarity,
+      fluency,
+      accent,
+    };
+
+    user.currentMetrics = updatedCurrentMetrics;
+    user.prevMetrics = updatedPreviousMetrics;
     await user.save();
 
     console.log("New history entry created:", historyEntry);
