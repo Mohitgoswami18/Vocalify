@@ -43,7 +43,7 @@ const webhookHandler = async (req, res) => {
       await User.create({
         clerkId: id,
         email: email,
-        profilePicture: image_url || null,
+        profilePic: image_url || null,
         username: username || genrateRandomUsername(),
       });
 

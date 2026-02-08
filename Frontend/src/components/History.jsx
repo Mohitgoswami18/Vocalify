@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import {
   LineChart,
@@ -10,60 +10,140 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import {useLocation} from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-/* ------------------ data ------------------ */
-
-// Overall summary trend ONLY
-const overallTrend = [
-  { month: "Jan", score: 62 },
-  { month: "Feb", score: 65 },
-  { month: "Mar", score: 68 },
-  { month: "Apr", score: 72 },
-  { month: "May", score: 75 },
-  { month: "Jun", score: 78 },
-  { month: "Jul", score: 80 },
-];
-
-// Metric full history
-const metricTrends = {
-  Confidence: [
-    { x: 1, y: 70 },
-    { x: 2, y: 75 },
-    { x: 3, y: 80 },
-  ],
-  Clarity: [
-    { x: 1, y: 78 },
-    { x: 2, y: 85 },
-    { x: 3, y: 82 },
-  ],
-  Fluency: [
-    { x: 1, y: 65 },
-    { x: 2, y: 70 },
-    { x: 3, y: 72 },
-  ],
-  Accent: [
-    { x: 1, y: 88 },
-    { x: 2, y: 85 },
-    { x: 3, y: 86 },
-  ],
-};
-
-/* ------------------ component ------------------ */
-
 const History = () => {
-
-  const [showDetailed, setShowDetailed] = useState(false);
+  const { username } = useParams();
   const location = useLocation();
-  const [dataLoaded, setDataLoaded] = useState(false);
-  const [userData, setUserData] = useState(null);
-  const [currentMetrics, setCurrentMetrics] = useState(null);
-  const param = useParams();
-  const username = param.username;
   const selectedMetric = location.state?.metric || null;
-  console.log(currentMetrics)
+
+  const [userData, setUserData] = useState(null);
+  console.log(userData)
+  const [currentMetrics, setCurrentMetrics] = useState(null);
+  const [selectedHistory, setSelectedHistory] = useState(null);
+  const [showDetailed, setShowDetailed] = useState(false);
+  const [showTranscript, setShowTranscript] = useState(false);
+  console.log(userData)
+
+  const [overallTrend, setOverallTrend] = useState([]);
+  const [metricTrends, setMetricTrends] = useState({
+    Confidence: [],
+    Clarity: [],
+    Fluency: [],
+    Accent: [],
+  });
+  const [detailedMetricTrends, setDetailedMetricTrends] = useState({
+    Confidence: [],
+    Clarity: [],
+    Fluency: [],
+    Accent: [],
+  });
+
+
+  /* ================= FETCH DATA ================= */
+
+  useEffect(() => {
+    if (!username) return;
+
+    const fetchHistory = async () => {
+      const res = await axios.get(
+        `http://localhost:10000/api/v1/user/history?username=${username}`,
+      );
+      setUserData(res.data);
+    };
+
+    const fetchCurrentMetrics = async () => {
+      const res = await axios.get(
+        `http://localhost:10000/api/v1/user/details?username=${username}`,
+      );
+      setCurrentMetrics(res.data.user);
+    };
+
+    fetchHistory();
+    fetchCurrentMetrics();
+  }, [username]);
+
+  /* ================= PREPARE CHART DATA ================= */
+
+  useEffect(() => {
+    if (!userData?.history?.length) return;
+
+    const sorted = [...userData.history].sort(
+      (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+    );
+
+    /* ---------- OVERALL TREND ---------- */
+    const overall = sorted.map((item) => ({
+      x: new Date(item.createdAt).toLocaleDateString(),
+      score: item.overallScore,
+    }));
+
+    setOverallTrend(overall);
+
+    /* ---------- SMALL CHARTS (LAST 3) ---------- */
+    const lastThree = sorted.slice(-3);
+
+    setMetricTrends({
+      Confidence: lastThree.map((item, i) => ({
+        x: i + 1,
+        y: item.metrics.confidence,
+      })),
+      Clarity: lastThree.map((item, i) => ({
+        x: i + 1,
+        y: item.metrics.clarity,
+      })),
+      Fluency: lastThree.map((item, i) => ({
+        x: i + 1,
+        y: item.metrics.fluency,
+      })),
+      Accent: lastThree.map((item, i) => ({
+        x: i + 1,
+        y: item.metrics.accent,
+      })),
+    });
+
+    /* ---------- DETAILED CHARTS (LAST 15) ---------- */
+    const lastFifteen = sorted.slice(-15);
+
+    setDetailedMetricTrends({
+      Confidence: lastFifteen.map((item, i) => ({
+        x: i + 1,
+        y: item.metrics.confidence,
+      })),
+      Clarity: lastFifteen.map((item, i) => ({
+        x: i + 1,
+        y: item.metrics.clarity,
+      })),
+      Fluency: lastFifteen.map((item, i) => ({
+        x: i + 1,
+        y: item.metrics.fluency,
+      })),
+      Accent: lastFifteen.map((item, i) => ({
+        x: i + 1,
+        y: item.metrics.accent,
+      })),
+    });
+
+    setSelectedHistory(sorted[sorted.length - 1]);
+  }, [userData]);
+
+
+  /* ================= AUTO SCROLL FROM DASHBOARD ================= */
+
+  useEffect(() => {
+    if (selectedMetric) {
+      setShowDetailed(true);
+      setTimeout(() => {
+        document
+          .getElementById(selectedMetric)
+          ?.scrollIntoView({ behavior: "smooth" });
+      }, 200);
+    }
+  }, [selectedMetric]);
+
+  /* ================= COMPARISON ================= */
+
   const comparison = {
     previous: {
       Confidence: currentMetrics?.prevMetrics?.confidence || 0,
@@ -79,50 +159,9 @@ const History = () => {
     },
   };
 
-  // Auto-open & scroll when coming from dashboard
-
-  useEffect(() => {
-    if (!username) return;
-    // Fetch user data
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:10000/api/v1/user/history?username=${username}`,
-        );
-        setDataLoaded(true);
-        setUserData(response.data);
-        // console.log("User Data:", response.data);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    const fetchCurrentMetrics = async () => {
-      try {
-        const response = await axios.get(`http://localhost:10000/api/v1/user/details?username=${username}`);
-        setCurrentMetrics(response.data.user);
-      } catch (error) {
-        console.error("Error fetching current metrics:", error);
-      }
-    }
-
-    fetchUserData();
-    fetchCurrentMetrics();
-  }, [username]);
-  useEffect(() => {
-    if (selectedMetric) {
-      setShowDetailed(true);
-      setTimeout(() => {
-        document
-          .getElementById(selectedMetric)
-          ?.scrollIntoView({ behavior: "smooth" });
-      }, 200);
-    }
-  }, [selectedMetric]);
-
   return (
     <div className="space-y-8">
-      {/* Header */}
+      {/* HEADER */}
       <div>
         <h1 className="text-2xl font-bold">Your Voice Journey</h1>
         <p className="text-sm text-muted-foreground">
@@ -130,7 +169,7 @@ const History = () => {
         </p>
       </div>
 
-      {/* Comparison */}
+      {/* COMPARISON */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {["previous", "current"].map((type) => (
           <Card key={type}>
@@ -139,7 +178,6 @@ const History = () => {
                 {type === "previous" ? "Previous Analysis" : "Current Analysis"}
               </CardTitle>
             </CardHeader>
-
             <CardContent className="space-y-4">
               {Object.entries(comparison[type]).map(([label, value]) => (
                 <div key={label}>
@@ -160,17 +198,62 @@ const History = () => {
         ))}
       </div>
 
-      {/* Overall Summary Trend */}
+      {/* SELECTED HISTORY DETAILS */}
+      {selectedHistory && (
+        <Card id="selected-history">
+          <CardHeader>
+            <CardTitle className="text-base">Analysis Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm">
+            <div className="flex flex-wrap gap-4 text-muted-foreground">
+              <span>
+                Overall: <b>{selectedHistory.overallScore}%</b>
+              </span>
+              <span>
+                Duration: <b>{selectedHistory.duration}s</b>
+              </span>
+              <span>
+                Source: <b className="capitalize">{selectedHistory.source}</b>
+              </span>
+              <span>
+                Date:{" "}
+                <b>
+                  {new Date(selectedHistory.createdAt).toLocaleDateString()}
+                </b>
+              </span>
+            </div>
+
+            {selectedHistory.audioUrl && (
+              <audio
+                controls
+                src={selectedHistory.audioUrl}
+                className="w-full"
+              />
+            )}
+
+            <button onClick={() => setShowTranscript(!showTranscript)} className="text-white font-bold rounded-md p-2  bg-blue-500 text-xs hover:bg-blue-600 cursor-pointer">
+              {showTranscript ? "Hide Transcript" : "Show Transcript"}
+            </button>
+
+            {showTranscript && (
+              <div className="border rounded-lg p-3 max-h-40 overflow-y-auto">
+                {selectedHistory.transcript || "No transcript available."}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* OVERALL TREND */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Overall Progress Trend</CardTitle>
         </CardHeader>
-
         <CardContent className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={overallTrend}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
+              <XAxis dataKey="x" />
               <YAxis />
               <Tooltip />
               <Line
@@ -184,17 +267,18 @@ const History = () => {
         </CardContent>
       </Card>
 
-      {/* Small Metric Charts (last 3 analyses) */}
+      {/* SMALL METRIC CHARTS */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {Object.entries(metricTrends).map(([metric, data]) => (
           <Card key={metric}>
             <CardHeader>
               <CardTitle className="text-sm">{metric}</CardTitle>
             </CardHeader>
-
             <CardContent className="h-28">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data}>
+                  <XAxis dataKey="x" hide />
+                  <YAxis hide />
                   <Line
                     type="monotone"
                     dataKey="y"
@@ -209,20 +293,20 @@ const History = () => {
         ))}
       </div>
 
-      {/* Toggle */}
+      {/* TOGGLE */}
       <div className="flex justify-center">
         <Button
           variant="outline"
-          onClick={() => setShowDetailed((prev) => !prev)}
+          onClick={() => setShowDetailed(!showDetailed)}
         >
           {showDetailed ? "Hide Detailed History" : "View Detailed History"}
         </Button>
       </div>
 
-      {/* ---------------- Detailed Metric Sections ---------------- */}
+      {/* DETAILED METRIC SECTIONS */}
       {showDetailed && (
         <div className="space-y-12 w-[60%] mx-auto">
-          {Object.entries(metricTrends).map(([metric, data]) => (
+          {Object.entries(detailedMetricTrends).map(([metric, data]) => (
             <section key={metric} id={metric}>
               <Card>
                 <CardHeader>
@@ -253,19 +337,43 @@ const History = () => {
         </div>
       )}
 
-      {/* Tips */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Tips for Improvement</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center justify-between flex-col sm:flex-row gap-4">
-          <p className="text-sm text-muted-foreground max-w-xl">
-            Based on your recent analysis, focus on varying your vocal pitch to
-            improve engagement. Practice reading aloud with different tones.
-          </p>
-          <Button>Practice Exercises</Button>
-        </CardContent>
-      </Card>
+      {/* PREVIOUS RECORDINGS */}
+      {userData?.history?.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Previous Recordings</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {userData.history.slice(0, 5).map((item, index) => (
+              <div
+                key={item._id}
+                className="flex justify-between items-center border rounded-lg p-3"
+              >
+                <div className="text-sm">
+                  <p className="font-medium">Analysis #{index + 1}</p>
+                  <p className="text-muted-foreground">
+                    {item.overallScore} · {item.duration}s · {item.source}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedHistory(item);
+                    setTimeout(() => {
+                      document
+                        .getElementById("selected-history")
+                        ?.scrollIntoView({ behavior: "smooth" });
+                    }, 150);
+                  }}
+                >
+                  View
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

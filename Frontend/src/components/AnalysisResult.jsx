@@ -21,6 +21,7 @@ const AnalysisResult = () => {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const [useResult, setUseResult] = useState(null);
+  const [audioPlayableUrl, setAudioPlayableUrl] = useState(null);
   const [prevUserData, setPrevUserData] = useState(null);
   const userAudio = location.state?.userAudio || "not recieved";
   const username = location.state?.username || "default";
@@ -129,6 +130,8 @@ const AnalysisResult = () => {
   useEffect(() => {
     if (!userAudio) return;
 
+    console.log("the audio file is ------------------------->>>>>>>>>:", userAudio);
+
     const url = URL.createObjectURL(userAudio);
     setAudioUrl(url);
 
@@ -148,7 +151,8 @@ const AnalysisResult = () => {
             },
           },
         );
-        setUseResult(response.data);
+        setUseResult(response.data.prediction);
+        setAudioPlayableUrl(response.data.audioUrl);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching analysis result:", error);
@@ -172,9 +176,9 @@ const AnalysisResult = () => {
             clarity: useResult?.other_features.scores.clarity || 0,
             fluency: useResult?.other_features.scores.fluency || 0,
             accent: useResult?.accent?.score || 0,
-            overallScore: useResult?.other_features.overallScore || 0,
-            audioUrl: audioUrl,
-            transcript: useResult?.transcript || null,
+            overallScore: useResult?.other_features.overallScore?.value || 0,
+            audioUrl: audioPlayableUrl?.secure_url || "no url",
+            transcript: useResult?.other_features?.transcript || null,
             duration: useResult?.other_features.duration_sec || 0,
             source: method,
           },

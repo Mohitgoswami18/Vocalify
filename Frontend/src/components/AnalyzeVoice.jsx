@@ -10,6 +10,7 @@ const AnalyzeVoice = () => {
   const username = param.username;
   const [selectedOption, setSelectedOption] = useState(null);
   const [audioFile, setAudioFile] = useState(null);
+  console.log("file path is ", audioFile)
 
   const handleClick = () => {
     if (selectedOption == "record") {

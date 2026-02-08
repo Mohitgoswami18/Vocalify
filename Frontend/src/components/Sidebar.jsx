@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useClerk } from "@clerk/clerk-react";
+import { RiMicAiFill } from "react-icons/ri";
 import {toast} from "sonner"
 import { useNavigate } from "react-router-dom";
 
@@ -26,7 +27,7 @@ const Sidebar = () => {
   return (
     <div className="hidden md:flex w-64 shadow-sm bg-white border-r flex-col">
       <div className="p-6 font-semibold text-blue-600 flex items-center gap-2">
-        🎤 Vocalify
+        <RiMicAiFill className="text-2xl"></RiMicAiFill> Vocalify
       </div>
 
       <nav className="flex-1 px-4 space-y-2 text-sm">
