@@ -88,7 +88,7 @@ const Dashboard = () => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:10000/api/v1/user/details?username=${username}`,
+          `https://vocalify-5u15.onrender.com/api/v1/user/details?username=${username}`,
         );
         setDataLoaded(true);
         setUserData(response.data.user);

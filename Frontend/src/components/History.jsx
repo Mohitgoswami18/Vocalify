@@ -48,14 +48,14 @@ const History = () => {
 
     const fetchHistory = async () => {
       const res = await axios.get(
-        `http://localhost:10000/api/v1/user/history?username=${username}`,
+        `https://vocalify-5u15.onrender.com/api/v1/user/history?username=${username}`,
       );
       setUserData(res.data);
     };
 
     const fetchCurrentMetrics = async () => {
       const res = await axios.get(
-        `http://localhost:10000/api/v1/user/details?username=${username}`,
+        `https://vocalify-5u15.onrender.com/api/v1/user/details?username=${username}`,
       );
       setCurrentMetrics(res.data.user);
     };

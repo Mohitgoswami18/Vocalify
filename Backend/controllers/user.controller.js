@@ -5,6 +5,8 @@ import History from "../schema/history.model.js";
 import uploadToCloudinary from "../cloudinary.js";
 import fs from "fs";
 
+const mlBackendPortURL = process.env.ML_BACKEND_URL;
+
 const dashboardController = async (req, res) => {
   const { username } = req.query;
   if (!username) {
@@ -195,7 +197,7 @@ const analysisPipelineController = async (req, res) => {
     );
 
     const modelPredictions = await axios.post(
-      "http://127.0.0.1:8000/analyze/speech",
+      `${mlBackendPortURL}/analyze/speech`,
       formData,
       {
         headers: formData.getHeaders(),

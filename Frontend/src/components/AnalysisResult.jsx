@@ -115,7 +115,7 @@ const AnalysisResult = () => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:10000/api/v1/user/details?username=${username}`,
+          `https://vocalify-5u15.onrender.com/api/v1/user/details?username=${username}`,
         );
         setPrevUserData(response.data.user);
         // console.log("User Data:", response.data.user);
@@ -143,7 +143,7 @@ const AnalysisResult = () => {
     const fetchDataFromBackend = async () => {
       try {
         const response = await axios.post(
-          "http://localhost:10000/api/v1/api/analyze-audio-result",
+          "https://vocalify-5u15.onrender.com/api/v1/api/analyze-audio-result",
           formData,
           {
             headers: {
@@ -169,7 +169,7 @@ const AnalysisResult = () => {
     const handleHistoryUpdation = async () => {
       try {
         const response = await axios.post(
-          "http://localhost:10000/api/v1/user/get-history",
+          "https://vocalify-5u15.onrender.com/api/v1/user/get-history",
           {
             username: username,
             confidence: useResult?.emotion?.confidence || 0,

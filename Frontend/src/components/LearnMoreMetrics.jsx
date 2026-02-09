@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import {useNavigate} from "react-router-dom";
+import { RiMicAiFill } from "react-icons/ri";
 import {
   BarChart2,
   BookOpen,
@@ -48,8 +49,8 @@ const LearnMoreMetrics = () => {
       {/* ================= HEADER ================= */}
       <header className="border-b px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2 font-semibold text-blue-600">
-          <BarChart2 className="w-5 h-5" />
-          SpeechInsights
+          <RiMicAiFill className="w-5 h-5" />
+          Vocalify
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-500 cursor-pointer">Help</span>
@@ -228,8 +229,9 @@ const LearnMoreMetrics = () => {
         {/* ================= CTA ================= */}
         <div className="text-center">
           <button
-          onClick={() => handleClick()}
-           className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium">
+            onClick={() => handleClick()}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium"
+          >
             Try a Sample Analysis
           </button>
         </div>

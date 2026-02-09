@@ -29,7 +29,7 @@ const Profile = () => {
     const fetchUserData = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:10000/api/v1/user/details?username=${username}`
+          `https://vocalify-5u15.onrender.com/api/v1/user/details?username=${username}`,
         );
         setUserData(res.data.user);
         setDataLoaded(true);
@@ -50,7 +50,7 @@ const Profile = () => {
       formData.append("profilePic", image);
       formData.append("username", username);
       const res = await axios.post(
-        "http://localhost:10000/api/v1/user/update-profile-picture",
+        "https://vocalify-5u15.onrender.com/api/v1/user/update-profile-picture",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },

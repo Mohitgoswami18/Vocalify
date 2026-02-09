@@ -15,7 +15,9 @@ const Topbar = () => {
   useEffect(() => {
     if(!username) return;
     try{
-      const response = axios.post(`http://localhost:10000/api/vi/user/details?username=${username}`);
+      const response = axios.post(
+        `https://vocalify-5u15.onrender.com/api/vi/user/details?username=${username}`,
+      );
       setUserImage(response.data?.profilePic || pic1);
     } catch (err) {
       console.log(err);
