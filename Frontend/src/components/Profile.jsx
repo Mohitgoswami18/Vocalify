@@ -104,7 +104,7 @@ const Profile = () => {
             <div className="relative group">
               {userData?.profilePic ? (
                 <img
-                  src={userData.profilePic}
+                  src={userData?.profilePic}
                   className="h-16 w-16 rounded-full object-cover cursor-pointer"
                   onClick={() => setIsToggled((p) => !p)}
                 />

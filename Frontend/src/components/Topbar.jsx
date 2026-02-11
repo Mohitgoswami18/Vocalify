@@ -10,25 +10,31 @@ const Topbar = () => {
   const navigate = useNavigate()
   const username = param.username;
 
-  console.log("username from the top bar is :", username)
-
   useEffect(() => {
-    if(!username) return;
-    try{
-      const response = axios.post(
-        `https://vocalify-5u15.onrender.com/api/vi/user/details?username=${username}`,
-      );
-      console.log(response.data)
-      setUserImage(response.data?.profilePic || pic1);
-    } catch (err) {
-      console.log(err);
-    }
+    if (!username) return;
 
-  }, [username])
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get(
+          `https://vocalify-5u15.onrender.com/api/v1/user/details?username=${username}`,
+        );
+
+        console.log(response.data.user);
+
+        setUserImage(response.data?.user?.profilePic);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchUser();
+  }, [username]);
+
+  console.log(userImage)
 
   return (
     <header className="bg-white shadow-sm border-b px-6 py-1 flex items-center justify-end">
-      <img src={userImage !== "empty" ? userImage : pic1} className="rounded-full cursor-pointer" 
+      <img src={userImage !== "empty" ? userImage : pic1} className="rounded-full w-12 cursor-pointer" 
       onClick={() => navigate(`/${username}/profile`)}/>
     </header>
   );
