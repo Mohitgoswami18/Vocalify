@@ -6,19 +6,34 @@ import BeforeAfterSection from "./BeforeAfterSection.jsx";
 import Testimonal from "./Testimonal.jsx";
 import Footer from "./Footer.jsx";
 import PricingSection from "./PricingSection.jsx";
+import {useRef} from "react"
 
 const LandingLayout = () => {
+
+  const featureRef = useRef(null)
+  const pricingRef = useRef(null)
+  const testimonalRef = useRef(null)
+  const contactRef = useRef(null)
+
   return (
     <div>
-      <Landing></Landing>
-      <Feature></Feature>
+      <Landing featureRef={featureRef} pricingRef={pricingRef} testimonalRef={testimonalRef} contactRef={contactRef}></Landing>
+      <div id="featureRef" ref={featureRef}>
+        <Feature></Feature>
+      </div>
       <AnalyticSection></AnalyticSection>
       <BeforeAfterSection></BeforeAfterSection>
-      <Testimonal></Testimonal>
-      <Footer></Footer>
-      <PricingSection></PricingSection>
+      <div id="pricingRef" ref={pricingRef}>
+        <PricingSection></PricingSection>
+      </div>
+      <div ref={testimonalRef}>
+        <Testimonal></Testimonal>
+      </div>
+      <div ref={contactRef}>
+        <Footer></Footer>
+      </div>
     </div>
-  )
+  );
 }
 
 export default LandingLayout

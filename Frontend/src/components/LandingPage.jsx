@@ -6,9 +6,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser, useClerk } from "@clerk/clerk-react";
 import { toast } from "sonner";
+import { RiMicAiFill } from "react-icons/ri";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const Landing = () => {
+const Landing = ({featureRef, testimonalRef, pricingRef, contactRef}) => {
   const [play, setPlay] = useState(false);
   const navigate = useNavigate();
   const { isSignedIn, isLoaded, user } = useUser();
@@ -34,28 +35,32 @@ const Landing = () => {
     }
   } 
 
+  const smoothScroll = (ref) => {
+    ref.current.scrollIntoView({ behavior: "smooth" });
+  }
+
   return (
     <div className="bg-white text-gray-900 ">
       {/* Navbar */}
       <header className="border-b font-[Inter] ">
         <div className="max-w-7xl mx-auto px-6 py-2 shadow-md flex items-center justify-between">
           <div className="flex items-center gap-2 text-xl font-bold text-blue-600">
-            🎤 Vocalify
+            <RiMicAiFill className="text-2xl"></RiMicAiFill> Vocalify
           </div>
 
           <nav className="hidden md:flex gap-6 text-sm text-gray-600">
-            <a href="#features" className="hover:text-gray-900">
+            <span onClick={() => smoothScroll(featureRef)} className="hover:text-gray-900 cursor-pointer">
               Features
-            </a>
-            <a href="#pricing" className="hover:text-gray-900">
+            </span>
+            <span onClick={() => smoothScroll(pricingRef)} className="hover:text-gray-900 cursor-pointer">
               Pricing
-            </a>
-            <a href="#testimonials" className="hover:text-gray-900">
+            </span>
+            <span onClick={() => smoothScroll(testimonalRef)} className="hover:text-gray-900 cursor-pointer">
               Testimonials
-            </a>
-            <a href="#contact" className="hover:text-gray-900">
+            </span>
+            <span onClick={() => smoothScroll(contactRef)} className="hover:text-gray-900 cursor-pointer">
               Contact
-            </a>
+            </span>
           </nav>
 
           {isLoaded ? (
@@ -94,7 +99,8 @@ const Landing = () => {
             ) : (
               <Skeleton className="h-11 w-30 bg-slate-400 rounded-lg" />
             )}
-            <button className="border flex items-center justify-center text-xs font-bold px-6 py-3 rounded-lg">
+            <button
+            onClick={() => setPlay("True")} className="border flex items-center justify-center text-xs font-bold px-6 py-3 rounded-lg">
               <MdOutlineExplore></MdOutlineExplore>View Demo
             </button>
           </div>

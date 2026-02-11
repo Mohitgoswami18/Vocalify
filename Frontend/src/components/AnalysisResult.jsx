@@ -9,7 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios"
@@ -20,6 +20,7 @@ import Waveform from "./Waveform.jsx"
 const AnalysisResult = () => {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate()
   const [useResult, setUseResult] = useState(null);
   const [audioPlayableUrl, setAudioPlayableUrl] = useState(null);
   const [prevUserData, setPrevUserData] = useState(null);
@@ -359,11 +360,8 @@ const AnalysisResult = () => {
 
         {/* Actions */}
         <div className="flex justify-end gap-3">
-          <button className="border border-blue-500 text-blue-600 px-4 py-2 rounded-lg text-sm cursor-pointer">
-            Export Transcript
-          </button>
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => navigate(`${username}/analyze`)}
             className="text-sm text-gray-500 cursor-pointer"
           >
             Re-analyze
