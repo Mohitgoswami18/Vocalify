@@ -36,6 +36,10 @@ const App = () => {
             <Route path="/:username/history" element={<History />} />
             <Route path="/:username/profile" element={<Profile />} />
             <Route path="/:username/recording" element={<RecordPractice />} />
+            <Route
+              path="/:username/analysisResult"
+              element={<AnalysisResult />}
+            />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
