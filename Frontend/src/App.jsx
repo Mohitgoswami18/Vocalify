@@ -36,8 +36,8 @@ const App = () => {
             <Route path="/:username/history" element={<History />} />
             <Route path="/:username/profile" element={<Profile />} />
             <Route path="/:username/recording" element={<RecordPractice />} />
+            <Route path="*" element={<NotFound />} />
           </Route>
-          <Route path="*" element={<NotFound />} />
         </Routes>
       </SignedIn>
     </>

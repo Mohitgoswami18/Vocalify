@@ -37,7 +37,7 @@ const NotFound = () => {
           </Link>
 
           <Link
-            to="/login"
+            to="/auth/login"
             className="w-full border hover:bg-gray-50 py-2.5 rounded-lg font-medium transition cursor-pointer"
           >
             Go to Login
