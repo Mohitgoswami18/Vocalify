@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import DashboardLayout from "./components/DashboardLayout.jsx";
 import Dashboard from "./components/Dashboard.jsx";
 import AnalyzeVoice from "./components/AnalyzeVoice";
@@ -13,10 +13,10 @@ import SsoCallback from "./components/SsoCallback.jsx";
 import AnalysisResult from "./components/AnalysisResult.jsx";
 import LearnMoreMetrics from "./components/LearnMoreMetrics.jsx";
 import RecordPractice from "./components/LiveRecording.jsx";
+import ProtectedRouteChecker from "./components/ProtectedRoutesChecker.jsx"
 
 const App = () => {
   return (
-    // Unprotected Routes
     <>
       <Routes>
         <Route path="/" element={<LandingLayout></LandingLayout>}></Route>
@@ -27,9 +27,7 @@ const App = () => {
           element={<SsoCallback></SsoCallback>}
         ></Route>
         <Route path="/help/analysis-metrics" element={<LearnMoreMetrics />} />
-      </Routes>
-      <SignedIn>
-        <Routes>
+        <Route element={<ProtectedRouteChecker />}>
           <Route element={<DashboardLayout />}>
             <Route path="/:username/dashboard" element={<Dashboard />} />
             <Route path="/:username/analyze" element={<AnalyzeVoice />} />
@@ -42,8 +40,8 @@ const App = () => {
             />
             <Route path="*" element={<NotFound />} />
           </Route>
-        </Routes>
-      </SignedIn>
+          </Route>
+      </Routes>
     </>
   );
 };
